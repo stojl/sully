@@ -3,6 +3,7 @@
 #include <R_ext/Random.h> // ACCESS TO UNIF NUMBER GENERATOR
 #include <R_ext/Utils.h> // ACCESS TO revsort
 
+// Taken from the implementation of base::sample.
 static void sample(int n, double *p, int *perm, int nans, int *ans)
 {
   double rU;
@@ -183,7 +184,6 @@ SEXP C_rmpp(SEXP n,
   }
   PutRNGstate();
   R_Free(perms);
-  //UNPROTECT(3 * n_ + 3);
   UNPROTECT(3);
   return result;
 }

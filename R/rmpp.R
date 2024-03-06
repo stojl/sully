@@ -74,7 +74,7 @@ print.mpp_sim <- function(x, digits = 2) {
     tY <- paste0(tY, ", ..., ")
     tY <- paste0(tY, paste0(tail(pY, 3), collapse = ", "))
   } else {
-    tT <- paste0(pT, collapse = ", ")
+    tT <- paste0(format(round(pT, digits), nsmall = digits), collapse = ", ")
     tY <- paste0(pY, collapse = ", ")
   }
   cat("Marked Point Procces Simulation containing", length(x), paths, "\n",
@@ -83,4 +83,16 @@ print.mpp_sim <- function(x, digits = 2) {
       "Path 1:\n",
       "Jump times:", tT, "\n",
       "Jump marks:", tY)
+}
+
+#' summary method for rmpp simulations.
+#'
+#' @param x Simulation of Marked Point Process by rmpp.
+#' @param discard_intial Should inital state and start time be discarded.
+#'
+#' @return data.frame
+#' @export
+summary.mpp_sim <- function(x, discard_inital = FALSE) {
+  setNames(data.frame(.Call("C_summary_rmpp", x, discard_inital)),
+           c("path", "time", "mark"))
 }
