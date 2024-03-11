@@ -23,7 +23,3 @@ matrix
 \description{
 A wrapper around matrix in order to create a list matrix.
 }
-\examples{
-A 2 x 2 empty list mat
-latrix(nrow = 2, ncol = 2)
-}

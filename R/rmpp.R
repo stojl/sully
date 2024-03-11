@@ -15,20 +15,35 @@
 #' @param limit Jump limit. If this limit is reached the simulation of the
 #'   particular path will stop. This is a safety measure.
 #' @param ... Additional arguments to be passed to the rate functions. This
-#'   could be baseline parameters such as age, gender etc.
+#'   could be baseline parameters such as age, gender etc. They must be
+#'   numerics, doubles or integers.
 #'
 #' @return list of simulated paths
 #' @export
-#'
-rmpp <- function(n, rates, drates, probs, t0, tn, y0 = NULL, mark_end = NULL, limit = 1e8) {
+rmpp <- function(n, rates, drates, probs, t0, tn, y0 = NULL, mark_end = NULL, limit = 1e8, ...) {
   n <- as.integer(n)
   t0 <- as.double(t0)
   tn <- as.double(tn)
-  if(is.null(y0)) y0 <- 1L
+  if(is.null(y0)) {
+    y0 <- 1L
+  } else {
+    if(!(length(t0) %in% c(1L, n)))
+      stop("y0 must have length 1 or n")
+  }
   y0 <- as.integer(y0)
   if(!is.null(mark_end)) mark_end <- as.integer(mark_end)
 
+  args <- list(...)
+  if(length(args) == 0) {
+    args <- NULL
+  } else {
+    arg_lengths <- lengths(args)
+    if(!(min(arg_lengths) %in% c(1L, n)) | !(max(arg_lengths) %in% c(1L, n)))
+      stop("Arguments in ... must have length 1 or n")
+  }
   limit <- as.integer(limit)
+  if(!(length(t0) %in% c(1L, n)))
+    stop("t0 must have length 1 or n")
   if(length(rates) == 0)
     stop("Must have non-zero amount of states.")
   if(length(rates) != length(drates))
@@ -37,7 +52,7 @@ rmpp <- function(n, rates, drates, probs, t0, tn, y0 = NULL, mark_end = NULL, li
     stop("Argument 'rates', 'drates' and 'probs' must all be of same length.")
 
   structure(
-    .Call("C_rmpp", n, rates, drates, probs, t0, tn, y0, mark_end, limit, environment()),
+    .Call("C_rmpp", n, rates, drates, probs, t0, tn, y0, mark_end, limit, args, new.env()),
     class = "mpp_sim",
     tn = tn,
     marked_end = mark_end
@@ -49,10 +64,11 @@ rmpp <- function(n, rates, drates, probs, t0, tn, y0 = NULL, mark_end = NULL, li
 #'
 #' @param x Simulation of Marked Point Process by rmpp.
 #' @param digits Amount of digits to be displayed.
+#' @param ... not used.
 #'
 #' @return Text display
 #' @export
-print.mpp_sim <- function(x, digits = 2) {
+print.mpp_sim <- function(x, ..., digits = 2) {
   if(length(x) == 1) {
     paths <- "path."
   } else {
@@ -67,12 +83,12 @@ print.mpp_sim <- function(x, digits = 2) {
   pT <- p[[1]]
   pY <- p[[2]]
   if(length(pT) > 10) {
-    tT <- paste0(format(round(head(pT, 5), digits), nsmall = digits), collapse = ", ")
+    tT <- paste0(format(round(utils::head(pT, 5), digits), nsmall = digits), collapse = ", ")
     tT <- paste0(tT, ", ..., ")
-    tT <- paste0(tT, paste0(format(round(tail(pT, 3), digits), nsmall = digits), collapse = ", "))
-    tY <- paste0(head(pY, 5), collapse = ", ")
+    tT <- paste0(tT, paste0(format(round(utils::tail(pT, 3), digits), nsmall = digits), collapse = ", "))
+    tY <- paste0(utils::head(pY, 5), collapse = ", ")
     tY <- paste0(tY, ", ..., ")
-    tY <- paste0(tY, paste0(tail(pY, 3), collapse = ", "))
+    tY <- paste0(tY, paste0(utils::tail(pY, 3), collapse = ", "))
   } else {
     tT <- paste0(format(round(pT, digits), nsmall = digits), collapse = ", ")
     tY <- paste0(pY, collapse = ", ")
@@ -85,14 +101,14 @@ print.mpp_sim <- function(x, digits = 2) {
       "Jump marks:", tY)
 }
 
-#' summary method for rmpp simulations.
+#' as.data.frame implementation for mmp_sim
 #'
 #' @param x Simulation of Marked Point Process by rmpp.
-#' @param discard_intial Should inital state and start time be discarded.
+#' @param discard_initial Should inital state and start time be discarded.
+#' @param ... not used.
 #'
 #' @return data.frame
 #' @export
-summary.mpp_sim <- function(x, discard_inital = FALSE) {
-  setNames(data.frame(.Call("C_summary_rmpp", x, discard_inital)),
-           c("path", "time", "mark"))
+as.data.frame.mpp_sim <- function(x, ..., discard_initial = FALSE) {
+  data.frame(.Call("C_summary_rmpp", x, discard_initial))
 }

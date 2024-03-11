@@ -13,7 +13,8 @@ rmpp(
   tn,
   y0 = NULL,
   mark_end = NULL,
-  limit = 1e+08
+  limit = 1e+08,
+  ...
 )
 }
 \arguments{
@@ -41,7 +42,8 @@ marked by a mark specified by mark_end.}
 particular path will stop. This is a safety measure.}
 
 \item{...}{Additional arguments to be passed to the rate functions. This
-could be baseline parameters such as age, gender etc.}
+could be baseline parameters such as age, gender etc. They must be
+numerics, doubles or integers.}
 }
 \value{
 list of simulated paths

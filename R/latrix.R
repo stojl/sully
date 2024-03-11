@@ -11,11 +11,8 @@
 #' @return matrix
 #' @export
 #'
-#' @examples
-#' A 2 x 2 empty list mat
-#' latrix(nrow = 2, ncol = 2)
 latrix <- function(data = NA, nrow = 1, ncol = 1, byrow = FALSE, dimnames = NULL) {
-  if(is.na(data)) data <- list()
+  if(identical(is.na(data), TRUE)) data <- list()
   matrix(data, nrow, ncol, byrow, dimnames)
 }
 
