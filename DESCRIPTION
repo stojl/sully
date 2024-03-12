@@ -1,6 +1,6 @@
 Package: sully
 Title: Estimation and Reserving in Disability Insurance
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: 
     person(given = "Lucas Støjko", 
            family = "Andersen",

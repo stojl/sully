@@ -3,16 +3,23 @@
 #' Constructs rates from a matrix of intensities to be used with rmpp.
 #'
 #' @param x matrix
+#' @param type If you intend to use rates for rmarkov or rsemimarkov you must
+#'   specify which one. Either 'markov' or 'semimarkov'.
 #'
 #' @return list of functions
 #' @export
-build_rates <- function(x) {
+build_rates <- function(x, type = "mpp") {
   n <- dim(x)[1]
   not_null <- x[!sapply(x, is.null)]
   if(length(not_null) > 0) {
     args <- names(formals(not_null[[1]]))
   } else {
-    args <- c("t", "ts", "ys", "idx")
+    args <- switch(
+      type,
+      "semimarkov" = c("t", "u"),
+      "markov" = "t",
+      c("t", "ts", "ys", "idx")
+    )
   }
   args <- paste0(args, collapse = ", ")
 
@@ -43,16 +50,22 @@ build_rates <- function(x) {
 #' rmpp.
 #'
 #' @param x matrix of intensities.
-#'
+#' @param type If you intend to use rates for rmarkov or rsemimarkov you must
+#'   specify which one. Either 'markov' or 'semimarkov'.
 #' @return list of functions
 #' @export
-build_probs <- function(x) {
+build_probs <- function(x, type = "mpp") {
   n <- dim(x)[1]
   not_null <- x[!sapply(x, is.null)]
   if(length(not_null) > 0) {
     args <- names(formals(not_null[[1]]))
   } else {
-    args <- c("t", "ts", "ys", "idx")
+    args <- switch(
+      type,
+      "semimarkov" = c("t", "u"),
+      "markov" = "t",
+      c("t", "ts", "ys", "idx")
+    )
   }
   args <- paste0(args, collapse = ", ")
   rates <- lapply(1:n, function(i) {

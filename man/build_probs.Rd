@@ -4,10 +4,13 @@
 \alias{build_probs}
 \title{build_probs}
 \usage{
-build_probs(x)
+build_probs(x, type = "mpp")
 }
 \arguments{
 \item{x}{matrix of intensities.}
+
+\item{type}{If you intend to use rates for rmarkov or rsemimarkov you must
+specify which one. Either 'markov' or 'semimarkov'.}
 }
 \value{
 list of functions
