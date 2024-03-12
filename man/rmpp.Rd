@@ -12,7 +12,7 @@ rmpp(
   tn,
   y0 = 1L,
   mark_end = NULL,
-  drates = dominate(rates),
+  drates = NULL,
   limit = 1e+08,
   ...
 )
@@ -39,7 +39,8 @@ marked by a mark specified by mark_end.}
 \item{drates}{List of functions that dominates each outflow rate in 'rates'.
 Intensities in 'rates' arguments are dominated by default using the
 optimize routine of the stats package. This is noticeably slower than
-dominating them manually and it is recommended to do so.}
+dominating them manually and it is recommended to do so as optimize will not
+always obtain an exact upper bound leading to warnings.}
 
 \item{limit}{Jump limit. If this limit is reached the simulation of the
 particular path will stop. This is a safety measure.}
