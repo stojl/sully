@@ -8,10 +8,10 @@ test_that("rmpp runs with no errors", {
 
   testthat::expect_type(
     rmpp(
-      5,
-      list(mu_1, mu_2),
-      list(mu_1, mu_2),
-      list(p_1, p_2),
+      n = 5,
+      rates = list(mu_1, mu_2),
+      drates = list(mu_1, mu_2),
+      probs = list(p_1, p_2),
       t0 = 0,
       tn = 5,
       y0 = 1
@@ -21,10 +21,10 @@ test_that("rmpp runs with no errors", {
 
   testthat::expect_no_error(
     rmpp(
-      5,
-      list(mu_1, mu_2),
-      list(mu_1, mu_2),
-      list(p_1, p_2),
+      n = 5,
+      rates = list(mu_1, mu_2),
+      drates = list(mu_1, mu_2),
+      probs = list(p_1, p_2),
       t0 = 0,
       tn = 5,
       y0 = 1
@@ -34,10 +34,10 @@ test_that("rmpp runs with no errors", {
 
   testthat::expect_no_error(
     rmpp(
-      5,
-      list(mu_1, mu_2),
-      list(mu_1, mu_2),
-      list(p_1, p_2),
+      n = 5,
+      rates = list(mu_1, mu_2),
+      drates = list(mu_1, mu_2),
+      probs = list(p_1, p_2),
       t0 = 0,
       tn = 5,
       y0 = 1,
@@ -48,10 +48,10 @@ test_that("rmpp runs with no errors", {
 
   testthat::expect_no_error(
     rmpp(
-      5,
-      list(mu_1, mu_2),
-      list(mu_1, mu_2),
-      list(p_1, p_2),
+      n = 5,
+      rates = list(mu_1, mu_2),
+      drates = list(mu_1, mu_2),
+      probs = list(p_1, p_2),
       t0 = 0,
       tn = 0,
       y0 = 1,
@@ -62,10 +62,10 @@ test_that("rmpp runs with no errors", {
 
   testthat::expect_no_error(
     rmpp(
-      5,
-      list(mu_1, mu_2),
-      list(mu_1, mu_2),
-      list(p_1, p_2),
+      n = 5,
+      rates = list(mu_1, mu_2),
+      drates = list(mu_1, mu_2),
+      probs = list(p_1, p_2),
       t0 = 0,
       tn = 0,
       y0 = 1

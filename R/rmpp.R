@@ -2,7 +2,6 @@
 #'
 #' @param n Number of paths to be simulated
 #' @param rates List of functions returning outflow of rates from each state.
-#' @param drates List of functions that dominates each outflow rate in 'rates'.
 #' @param probs List of functions that return probability of jumping to each
 #'   state.
 #' @param t0 Starting time. Must have length 1 or same length as number of
@@ -12,6 +11,11 @@
 #'   paths.
 #' @param mark_end If end time tn is reached before absorbing state then it is
 #'   marked by a mark specified by mark_end.
+#' @param drates List of functions that dominates each outflow rate in 'rates'.
+#'   Intensities in 'rates' arguments are dominated by default using the
+#'   optimize routine of the stats package. This is noticeably slower than
+#'   dominating them manually and it is recommended to do so as optimize will not
+#'   always obtain an exact upper bound leading to warnings.
 #' @param limit Jump limit. If this limit is reached the simulation of the
 #'   particular path will stop. This is a safety measure.
 #' @param ... Additional arguments to be passed to the rate functions. This
@@ -20,7 +24,17 @@
 #'
 #' @return list of simulated paths
 #' @export
-rmpp <- function(n, rates, drates, probs, t0, tn, y0 = NULL, mark_end = NULL, limit = 1e8, ...) {
+rmpp <- function(n,
+                 rates,
+                 probs,
+                 t0,
+                 tn,
+                 y0 = 1L,
+                 mark_end = NULL,
+                 drates = NULL,
+                 limit = 1e8,
+                 ...) {
+  if(is.null(drates)) drates <- dominate(rates)
   n <- as.integer(n)
   t0 <- as.double(t0)
   tn <- as.double(tn)
@@ -51,8 +65,9 @@ rmpp <- function(n, rates, drates, probs, t0, tn, y0 = NULL, mark_end = NULL, li
   if(length(rates) != length(probs))
     stop("Argument 'rates', 'drates' and 'probs' must all be of same length.")
 
+  sim <- .Call("C_rmpp", n, rates, drates, probs, t0, tn, y0, mark_end, limit, args, new.env())
   structure(
-    .Call("C_rmpp", n, rates, drates, probs, t0, tn, y0, mark_end, limit, args, new.env()),
+    sim,
     class = "mpp_sim",
     tn = tn,
     marked_end = mark_end
@@ -98,7 +113,7 @@ print.mpp_sim <- function(x, ..., digits = 2) {
       "End mark:", me, "\n\n",
       "Path 1:\n",
       "Jump times:", tT, "\n",
-      "Jump marks:", tY)
+      "Jump marks:", tY, "\n")
 }
 
 #' as.data.frame implementation for mmp_sim

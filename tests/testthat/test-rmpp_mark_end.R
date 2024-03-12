@@ -7,10 +7,10 @@ test_that("rmpp mark_end argument works correctly", {
   p_2 <- function(t, ts, ys, idx) c(1, 0)
 
   x <- rmpp(
-    5,
-    list(mu_1, mu_2),
-    list(mu_1, mu_2),
-    list(p_1, p_2),
+    n = 5,
+    rates = list(mu_1, mu_2),
+    drates = list(mu_1, mu_2),
+    probs = list(p_1, p_2),
     t0 = 0,
     tn = 5,
     y0 = 1,
@@ -21,10 +21,10 @@ test_that("rmpp mark_end argument works correctly", {
   expect_equal(x[length(x)], 0L, info = "Correct end mark with positive end time.")
 
   x <- rmpp(
-    5,
-    list(mu_1, mu_2),
-    list(mu_1, mu_2),
-    list(p_1, p_2),
+    n = 5,
+    rates = list(mu_1, mu_2),
+    drates = list(mu_1, mu_2),
+    probs = list(p_1, p_2),
     t0 = 0,
     tn = 0,
     y0 = 1,
@@ -36,10 +36,10 @@ test_that("rmpp mark_end argument works correctly", {
   expect_equal(length(x), 2L, info = "Correct sample length with 0 end time.")
 
   x <- rmpp(
-    5,
-    list(mu_1, mu_2),
-    list(mu_1, mu_2),
-    list(p_1, p_2),
+    n = 5,
+    rates = list(mu_1, mu_2),
+    drates = list(mu_1, mu_2),
+    probs = list(p_1, p_2),
     t0 = 0,
     tn = 0,
     y0 = 1

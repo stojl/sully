@@ -2,6 +2,7 @@
 #include <Rinternals.h>
 #include <R_ext/Random.h> // ACCESS TO UNIF NUMBER GENERATOR
 #include <R_ext/Utils.h> // ACCESS TO revsort
+#include <R_ext/Error.h> // ACCESS TO warning
 
 // Taken from the implementation of base::sample.
 static void sample(int n, double *p, int *perm, int nans, int *ans)
@@ -150,6 +151,9 @@ SEXP C_rmpp(SEXP n,
   R_len_t t0_length = LENGTH(t0);
   R_len_t y0_length = LENGTH(y0);
 
+  double exceed;
+  int was_warning = 0;
+
   GetRNGstate();
   for(R_xlen_t l = 0; l < n_; ++l) {
     R_xlen_t c = 1;
@@ -189,7 +193,7 @@ SEXP C_rmpp(SEXP n,
       }
 
       // Call
-      dom = REAL(call_f(drates, env, ts, ys, arglist, names, ts_[c - 1], ts_, ys_, c))[0];
+      dom = REAL(call_f(drates, env, ts, ys, arglist, names, tn_, ts_, ys_, c))[0];
 
       if(dom == 0) {
         break;
@@ -199,6 +203,7 @@ SEXP C_rmpp(SEXP n,
         double u;
         double mu_dot;
         double min_s;
+        double ratio;
         s += exp_rand() / dom;
 
         min_s = (s > tn_) ? tn_ : s;
@@ -221,8 +226,15 @@ SEXP C_rmpp(SEXP n,
         }
 
         u = unif_rand();
+        ratio = mu_dot / dom;
+        if(was_warning == 0) {
+          if(ratio > 1) {
+            was_warning = 1;
+            warning("Intensity ratio %f. Intensities were not properly dominated. Simulation results may be misleading.\n", ratio);
+          }
+        }
 
-        if(u <= mu_dot / dom) {
+        if(u <= ratio) {
           SEXP pp;
           double *p;
 

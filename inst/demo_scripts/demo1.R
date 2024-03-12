@@ -14,6 +14,10 @@ mu12_dom <- function(t, ts, ys, idx, w, v) {
   exp(-3 + 0.15 * 10 + w)
 }
 
+microbenchmark::microbenchmark(
+  test = mu12_dom(0.3, 0.3, 0.3, 1, 0.2, 0.4)
+)
+
 intens <- matrix(list(
   NULL, mu_12, mu_1d,
   NULL, NULL, NULL,
@@ -31,11 +35,15 @@ n <- 50000
 w <- rbinom(n, 1, 0.5)
 v <- v_quantile(runif(n), 1 / 4, 10)
 
-test <- rmpp(
+
+rts <- build_rates(intens)
+drts <- build_rates(intens_dom)
+prbs <- build_probs(intens)
+
+rmpp(
   n,
-  rates = build_rates(intens),
-  drates = build_rates(intens_dom),
-  probs = build_probs(intens),
+  rates = rts,
+  probs = prbs,
   t0 = v,
   tn = 10,
   y0 = 1,

@@ -7,10 +7,10 @@ test_that("as.data.frame generic works for rmpp output", {
   p_2 <- function(t, ts, ys, idx) c(1, 0)
 
   x <- rmpp(
-    5,
-    list(mu_1, mu_2),
-    list(mu_1, mu_2),
-    list(p_1, p_2),
+    n = 5,
+    rates = list(mu_1, mu_2),
+    drates = list(mu_1, mu_2),
+    probs = list(p_1, p_2),
     t0 = 0,
     tn = 5,
     y0 = 1,

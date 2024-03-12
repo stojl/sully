@@ -75,3 +75,44 @@ build_probs <- function(x) {
   })
   rates
 }
+
+#' dominate
+#'
+#' Automatic domination of intensities used in rmpp.
+#'
+#' @param fns A list of functions
+#'
+#' @return A list of functions
+#' @export
+dominate <- function(fns) {
+  fn <- fns[[1]]
+  args <- paste0(
+    names(formals(fn))[-1],
+    " = ",
+    names(formals(fn))[-1],
+    collapse = ", "
+  )
+  args2 <- names(formals(fn))
+  args2 <- paste0(args2, collapse = ", ")
+  lapply(fns, function(farg_) {
+    force(farg_)
+    parse_tree <- deparse(farg_)
+    if(identical(parse_tree[2], "{")) {
+      text_body <- parse_tree[3]
+    } else {
+      text_body <- parse_tree[2]
+    }
+    if(identical(text_body, "0") | identical(text_body, "    0")) {
+      callex <- paste0("function(", args2, ") 0")
+    } else {
+      callex <- paste0(
+        "function(", args2, ") {",
+        "stats::optimize(farg_, c(ts[idx], t),
+      ", args,
+        ", maximum=TRUE)$objective}"
+      )
+    }
+    callex <- parse(text = callex)
+    eval(callex)
+  })
+}

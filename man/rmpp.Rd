@@ -7,12 +7,12 @@
 rmpp(
   n,
   rates,
-  drates,
   probs,
   t0,
   tn,
-  y0 = NULL,
+  y0 = 1L,
   mark_end = NULL,
+  drates = dominate(rates),
   limit = 1e+08,
   ...
 )
@@ -21,8 +21,6 @@ rmpp(
 \item{n}{Number of paths to be simulated}
 
 \item{rates}{List of functions returning outflow of rates from each state.}
-
-\item{drates}{List of functions that dominates each outflow rate in 'rates'.}
 
 \item{probs}{List of functions that return probability of jumping to each
 state.}
@@ -37,6 +35,11 @@ paths.}
 
 \item{mark_end}{If end time tn is reached before absorbing state then it is
 marked by a mark specified by mark_end.}
+
+\item{drates}{List of functions that dominates each outflow rate in 'rates'.
+Intensities in 'rates' arguments are dominated by default using the
+optimize routine of the stats package. This is noticeably slower than
+dominating them manually and it is recommended to do so.}
 
 \item{limit}{Jump limit. If this limit is reached the simulation of the
 particular path will stop. This is a safety measure.}
