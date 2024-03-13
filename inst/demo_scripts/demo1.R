@@ -6,14 +6,6 @@ mu_12 <- function(t, ts, ys, idx, w, v) {
   exp(-3 + 0.15 * t + w)
 }
 
-mu_12 <- function(t, w, v) {
-  exp(-3 + 0.15 * t + w)
-}
-
-mu_1d <- function(t, w, v) {
-  (w / 10) * exp(0.1 * v)
-}
-
 mu_1d <- function(t, ts, ys, idx, w, v) {
   (w / 10) * exp(0.1 * v)
 }
@@ -45,13 +37,45 @@ v <- v_quantile(runif(n), 1 / 4, 10)
 
 
 rts <- build_rates(intens)
-drts <- build_rates(intens_dom)
+drts <- build_rates(intens)
 prbs <- build_probs(intens)
 
+rmpp(
+  n,
+  rates = build_rates(intens),
+  # drates = build_rates(intens),
+  probs = build_probs(intens),
+  t0 = v,
+  tn = 10,
+  y0 = 1,
+  mark_end = 0,
+  w = w,
+  v = v
+  ) %>% as_tibble()
 
 mu_1 <- function(t) exp(0.001 * t)
 
-rmarkov(
+
+microbenchmark::microbenchmark(
+  rmarkov(
+    n,
+    rates = build_rates(intens),
+    # drates = build_rates(intens3),
+    probs = build_probs(intens),
+    t0 = 0,
+    tn = 10,
+    y0 = 1,
+    mark_end = 0,
+    w = w,
+    v = v
+  )
+)
+
+microbenchmark::microbenchmark(
+
+)
+
+test <- rmpp(
   n,
   rates = build_rates(intens),
   # drates = build_rates(intens3),
@@ -62,22 +86,6 @@ rmarkov(
   mark_end = 0,
   w = w,
   v = v
-) %>%
-  as.data.frame()
-
-
-
-
-test <- rmpp(
-  n,
-  rates = build_rates(intens2),
-  # drates = build_rates(intens3),
-  probs = build_probs(intens2),
-  t0 = 0,
-  tn = 10,
-  y0 = 1,
-  mark_end = 0,
-  w = w
 )
 
 test %>%

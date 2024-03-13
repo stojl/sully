@@ -2,7 +2,7 @@
 % Please edit documentation in R/rmpp.R
 \name{rmpp}
 \alias{rmpp}
-\title{rmpp Simulate paths of marked point process on a finite interval.}
+\title{rmpp}
 \usage{
 rmpp(
   n,
@@ -39,8 +39,8 @@ marked by a mark specified by mark_end.}
 \item{drates}{List of functions that dominates each outflow rate in 'rates'.
 Intensities in 'rates' arguments are dominated by default using the
 optimize routine of the stats package. This is noticeably slower than
-dominating them manually and it is recommended to do so as optimize will not
-always obtain an exact upper bound leading to warnings.}
+dominating them manually and it is recommended to do so as optimize will
+not always obtain an exact upper bound leading to warnings.}
 
 \item{limit}{Jump limit. If this limit is reached the simulation of the
 particular path will stop. This is a safety measure.}
@@ -53,5 +53,170 @@ numerics, doubles or integers.}
 list of simulated paths
 }
 \description{
-rmpp Simulate paths of marked point process on a finite interval.
+Simulate paths of marked point process on a finite interval.
+}
+\examples{
+## Life-Death model simulation on the interval 0 to 10.
+
+# Cumulative intensity rates out of each state. In the case of a two state
+# model each intensity is also the outflow rate.
+
+mu_12 <- function(t, ts, ys, idx) exp(0.0015 * t)
+mu_21 <- function(t, ts, ys, idx) 0
+
+mu_12_dom <- function(t, ts, ys, idx) exp(0.0015 * 10)
+
+p_12 <- function(t, ts, ys, idx) c(0, 1)
+p_21 <- function(t, ts, ys, idx) c(0, 0)
+
+# mark_end = 0 means that another "jump" will be recorded if a path has not
+# reached an absorbing state before the time limit specified by tn. An
+# arbitrary mark can be used to mark these "jumps". If leaft out, no "jump"
+# will be recorded.
+
+sims1 <- rmpp(
+  10,
+  rates = list(mu_12, mu_21),
+  drates = list(mu_12_dom, mu_21),
+  probs = list(p_12, p_21),
+  t0 = 0,
+  tn = 10,
+  mark_end = 0
+)
+
+# We can output the result as a data.frame
+sims1_df <- as.data.frame(sims1)
+
+## Simulation from multi-state models
+
+# For multi-state model, it can be useful to use build_rates and build_probs
+# to compute the total intensity outflow of each state together with the jump
+# probabilities.
+
+mu_12 <- function(t, ts, ys, idx) exp(0.0015 * t)
+mu_13 <- function(t, ts, ys, idx) exp(0.015 * t)
+mu_21 <- function(t, ts, ys, idx) exp(0.3 * t)
+mu_23 <- function(t, ts, ys, idx) exp(0.001 * t)
+
+# If an off-diagnoal entry is NULL the intensity is 0
+
+intensity_matrix <- matrix(list(
+  NULL, mu_12, mu_13,
+  mu_21, NULL, mu_23,
+  NULL, NULL, NULL
+), byrow = TRUE, ncol = 3)
+
+my_rates <- build_rates(intensity_matrix)
+my_probs <- build_probs(intensity_matrix)
+
+# We could manually specify rates that dominate our rates, but rmpp can do it
+# automatically using the optimize() function. The simulation will be slower
+# than if you specify it manually.
+
+sims2 <- rmpp(
+  10,
+  rates = my_rates,
+  probs = my_probs,
+  t0 = 0,
+  tn = 10,
+  mark_end = 0
+)
+
+# data.frame output
+
+sims2_df <- as.data.frame(sims2)
+
+# The intial state is always recorded. If we wish to exclude these we can do
+# this by setting discard_initial = TRUE.
+
+sims2_df_no_first <- as.data.frame(sims2, discard_initial = TRUE)
+
+# It is possible to specify different starting times and starting states for
+# each simulated path.
+
+sims3 <- rmpp(
+  10,
+  rates = my_rates,
+  probs = my_probs,
+  t0 = seq(0, 5, length.out = 10L),
+  y0 = c(1, 2, 2, 1, 1, 2, 2, 1, 2, 1),
+  tn = 10,
+  mark_end = 0
+)
+
+## Simulating from duration dependent intensities
+
+# We specify a 3 state model 1 -> 2 -> 3 where 3 is absorbing. The intensity
+# from 2 -> 3 is duration dependent. The entire history of the marked point
+# process is passed through the arguments ts and ys. The idx argument
+# is the index of the last jump in the ts and ys vectors.
+
+# WARNING: Only entries of from 1 to idx of the vectors ts and ys should be
+# used. If something like sum(ts) is needed it should be done as
+# sum(ts[1:idx]). Anything beyond index idx is used as a buffer for further
+# jumps.
+
+mu_12 <- function(t, ts, ys, idx) exp(0.0015 * t)
+mu_23 <- function(t, ts, ys, idx) exp(0.001 * t + 0.15 * (t - ts[idx]))
+
+tmatrix <- matrix(list(
+  NULL, mu_12, NULL,
+  NULL, NULL, mu_23,
+  NULL, NULL, NULL
+), byrow = TRUE, ncol = 3)
+
+my_rates2 <- build_rates(tmatrix)
+my_probs2 <- build_probs(tmatrix)
+
+sims4 <- rmpp(
+  10,
+  rates = my_rates2,
+  probs = my_probs2,
+  t0 = 0,
+  y0 = 1,
+  tn = 10,
+  mark_end = 0
+)
+
+## Simulating from intensities with baseline covariates
+
+# It is simple to include baseline covariates in simulation process
+
+# All intensity functions must have the arguments even if they do not depend
+# on the baseline covariate w. The covariates must be numerics - either
+# integers or doubles. More than one covariate can be specified by adding more
+# arguments.
+
+mu_12 <- function(t, ts, ys, idx, w) exp(0.0015 * t + 0.1 * w)
+mu_13 <- function(t, ts, ys, idx, w) exp(0.02 * t)
+
+tmatrix <- matrix(list(
+  NULL, mu_12, mu_13,
+  NULL, NULL, NULL,
+  NULL, NULL, NULL
+), byrow = TRUE, ncol = 3)
+
+my_rates3 <- build_rates(tmatrix)
+my_probs3 <- build_probs(tmatrix)
+
+# We simulate baseline covariates
+
+ws <- rbinom(10, 1, 0.75)
+
+# The covariates are passed as additional arguments to rmpp
+
+sims4 <- rmpp(
+  10,
+  rates = my_rates3,
+  probs = my_probs3,
+  t0 = 0,
+  y0 = 1,
+  tn = 10,
+  mark_end = 0,
+  w = ws
+)
+
+# The covariates are included in the data.frame output
+
+sims4_df <- as.data.frame(sims4)
 }
