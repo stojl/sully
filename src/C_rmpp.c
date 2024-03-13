@@ -108,7 +108,7 @@ SEXP C_rmpp(SEXP n,
             SEXP args,
             SEXP env) {
   double *t0_ = REAL(t0);
-  double tn_ = REAL(tn)[0];
+  double *tns = REAL(tn);
   int n_ = INTEGER(n)[0];
   int *y0_ = INTEGER(y0);
   int M = INTEGER(limit)[0];
@@ -134,22 +134,24 @@ SEXP C_rmpp(SEXP n,
     arg_length = LENGTH(args);
     PROTECT(names = getAttrib(args, R_NamesSymbol));
     PROTECT(arglist = allocVector(VECSXP, arg_length));
-    PROTECT(arg_names = allocVector(STRSXP, arg_length + 4));
+    PROTECT(arg_names = allocVector(STRSXP, arg_length + 5));
     for(R_len_t i = 0; i < arg_length; ++i) {
-      SET_STRING_ELT(arg_names, i + 4, STRING_ELT(names, i));
+      SET_STRING_ELT(arg_names, i + 5, STRING_ELT(names, i));
     }
   } else {
     PROTECT(names = allocVector(NILSXP, 1));
     PROTECT(arglist = allocVector(NILSXP, 1));
-    PROTECT(arg_names = allocVector(STRSXP, 4));
+    PROTECT(arg_names = allocVector(STRSXP, 5));
   }
   SET_STRING_ELT(arg_names, 0, mkChar("t"));
   SET_STRING_ELT(arg_names, 1, mkChar("y"));
   SET_STRING_ELT(arg_names, 2, mkChar("t0"));
   SET_STRING_ELT(arg_names, 3, mkChar("y0"));
+  SET_STRING_ELT(arg_names, 4, mkChar("tn"));
 
   R_len_t t0_length = LENGTH(t0);
   R_len_t y0_length = LENGTH(y0);
+  R_len_t tn_length = LENGTH(tn);
 
   double exceed;
   int was_warning = 0;
@@ -159,6 +161,7 @@ SEXP C_rmpp(SEXP n,
     R_xlen_t c = 1;
     ts_[0] = t0_length == 1 ? t0_[0] : t0_[l];
     ys_[0] = y0_length == 1 ? y0_[0] : y0_[l];
+    double tn_ = tn_length == 1 ? tns[0] : tns[l];
 
     if(TYPEOF(args) != NILSXP)
       set_args(&arglist, &args, l);
@@ -270,7 +273,7 @@ SEXP C_rmpp(SEXP n,
     SEXP out_2 = PROTECT(allocVector(INTSXP, c));
     int *out_2_ = INTEGER(out_2);
 
-    SEXP out = PROTECT(allocVector(VECSXP, 4 + arg_length));
+    SEXP out = PROTECT(allocVector(VECSXP, 5 + arg_length));
 
     for(R_xlen_t i = 0; i < c; ++i) {
       out_1_[i] = ts_[i];
@@ -281,14 +284,15 @@ SEXP C_rmpp(SEXP n,
     SET_VECTOR_ELT(out, 1, out_2);
     SET_VECTOR_ELT(out, 2, PROTECT(ScalarReal(ts_[0])));
     SET_VECTOR_ELT(out, 3, PROTECT(ScalarInteger(ys_[0])));
+    SET_VECTOR_ELT(out, 4, PROTECT(ScalarReal(tn_)));
     if(TYPEOF(args) != NILSXP) {
       for(R_len_t h = 0; h < arg_length; ++h) {
-        SET_VECTOR_ELT(out, 4 + h, VECTOR_ELT(arglist, h));
+        SET_VECTOR_ELT(out, 5 + h, VECTOR_ELT(arglist, h));
       }
     }
     setAttrib(out, R_NamesSymbol, arg_names);
     SET_VECTOR_ELT(result, l, out);
-    UNPROTECT(5);
+    UNPROTECT(6);
   }
   PutRNGstate();
   R_Free(perms);

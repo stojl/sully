@@ -245,12 +245,14 @@ rmpp <- function(n,
 #' print method for rmpp simulations.
 #'
 #' @param x Simulation of Marked Point Process by rmpp.
-#' @param digits Amount of digits to be displayed.
+#' @param n Number of paths to be displayed
+#' @param digits Amount of digits to be displayed
 #' @param ... not used.
 #'
 #' @return Text display
 #' @export
-print.mpp_sim <- function(x, ..., digits = 2) {
+print.mpp_sim <- function(x, ..., n = 1, digits = 2) {
+  n <- min(n, length(x))
   if(length(x) == 1) {
     paths <- "path."
   } else {
@@ -261,26 +263,40 @@ print.mpp_sim <- function(x, ..., digits = 2) {
   } else {
     me <- attr(x, "marked_end")
   }
-  p <- x[[1]]
-  pT <- p[[1]]
-  pY <- p[[2]]
-  if(length(pT) > 10) {
-    tT <- paste0(format(round(utils::head(pT, 5), digits), nsmall = digits), collapse = ", ")
-    tT <- paste0(tT, ", ..., ")
-    tT <- paste0(tT, paste0(format(round(utils::tail(pT, 3), digits), nsmall = digits), collapse = ", "))
-    tY <- paste0(utils::head(pY, 5), collapse = ", ")
-    tY <- paste0(tY, ", ..., ")
-    tY <- paste0(tY, paste0(utils::tail(pY, 3), collapse = ", "))
-  } else {
-    tT <- paste0(format(round(pT, digits), nsmall = digits), collapse = ", ")
-    tY <- paste0(pY, collapse = ", ")
+
+  out <- vector("list", n * 3 + 7)
+  out[[1]] <- "Marked Point Procces Simulation containing"
+  out[[2]] <- length(x)
+  out[[3]] <- paths
+  out[[4]] <- "\n"
+  out[[5]] <- "End mark:"
+  out[[6]] <- me
+  out[[7]] <- "\n\n"
+  for(i in 1:n) {
+    p <- x[[i]]
+    pT <- p[[1]]
+    pY <- p[[2]]
+    if(length(pT) > 10) {
+      tT <- paste0(
+        format(round(utils::head(pT, 5), digits), nsmall = digits),
+        collapse = ", "
+      )
+      tT <- paste0(tT, ", ..., ")
+      tT <- paste0(tT, paste0(format(round(utils::tail(pT, 3), digits), nsmall = digits), collapse = ", "))
+      tY <- paste0(utils::head(pY, 5), collapse = ", ")
+      tY <- paste0(tY, ", ..., ")
+      tY <- paste0(tY, paste0(utils::tail(pY, 3), collapse = ", "))
+    } else {
+      tT <- paste0(format(round(pT, digits), nsmall = digits), collapse = ", ")
+      tY <- paste0(pY, collapse = ", ")
+    }
+
+    out[[3 * (i - 1) + 8]] <- paste0("Path ", i, ":\n")
+    out[[3 * (i - 1) + 1 + 8]] <- paste0("Jump times: ", tT, "\n")
+    out[[3 * (i - 1) + 2 + 8]] <- paste0("Jump marks: ", tY, "\n\n")
   }
-  cat("Marked Point Procces Simulation containing", length(x), paths, "\n",
-      "Time limit:", attr(x, "tn"), "\n",
-      "End mark:", me, "\n\n",
-      "Path 1:\n",
-      "Jump times:", tT, "\n",
-      "Jump marks:", tY, "\n")
+
+  do.call(cat, out)
 }
 
 #' as.data.frame implementation for mmp_sim

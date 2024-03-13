@@ -45,15 +45,13 @@ rmpp(
   rates = build_rates(intens),
   # drates = build_rates(intens),
   probs = build_probs(intens),
-  t0 = v,
+  t0 = 0,
   tn = 10,
   y0 = 1,
   mark_end = 0,
   w = w,
   v = v
-  ) %>% as_tibble()
-
-mu_1 <- function(t) exp(0.001 * t)
+  ) %>% as.data.frame()
 
 
 microbenchmark::microbenchmark(
@@ -71,22 +69,19 @@ microbenchmark::microbenchmark(
   )
 )
 
-microbenchmark::microbenchmark(
-
-)
-
 test <- rmpp(
-  n,
+  10,
   rates = build_rates(intens),
   # drates = build_rates(intens3),
   probs = build_probs(intens),
   t0 = 0,
-  tn = 10,
+  tn = 10 + rexp(10),
   y0 = 1,
   mark_end = 0,
-  w = w,
-  v = v
+  w = w[1:10],
+  v = v[1:10]
 )
+as.data.frame(test)
 
 test %>%
   as.data.frame(discard_initial = TRUE) %>%
