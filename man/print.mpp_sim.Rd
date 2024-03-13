@@ -4,14 +4,16 @@
 \alias{print.mpp_sim}
 \title{print method for rmpp simulations.}
 \usage{
-\method{print}{mpp_sim}(x, ..., digits = 2)
+\method{print}{mpp_sim}(x, ..., n = 1, digits = 2)
 }
 \arguments{
 \item{x}{Simulation of Marked Point Process by rmpp.}
 
 \item{...}{not used.}
 
-\item{digits}{Amount of digits to be displayed.}
+\item{n}{Number of paths to be displayed}
+
+\item{digits}{Amount of digits to be displayed}
 }
 \value{
 Text display

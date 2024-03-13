@@ -4,4 +4,5 @@ A package for simulating marked point processes.
 
 # Todo
 
-- Nothing at the moment.
+- Native support for multi-state markov simulations
+- Native support for multi-state semimarkov simulations
