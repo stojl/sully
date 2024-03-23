@@ -251,6 +251,10 @@ SEXP C_rmpp(SEXP n,
           for(int i = 0; i < nn; ++i) {
             ss += p[i];
           }
+          if(ss == 0) {
+            super_break = 1;
+            break;
+          }
           for(int j = 0; j < nn; ++j) {
             p[j] /= ss;
           }
