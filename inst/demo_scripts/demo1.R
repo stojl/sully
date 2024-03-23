@@ -35,7 +35,6 @@ n <- 1000
 w <- rbinom(n, 1, 0.5)
 v <- v_quantile(runif(n), 1 / 4, 10)
 
-
 rts <- build_rates(intens)
 drts <- build_rates(intens)
 prbs <- build_probs(intens)
