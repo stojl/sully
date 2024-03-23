@@ -129,3 +129,25 @@ dominate <- function(fns) {
     eval(callex)
   })
 }
+
+#' complete_intensity_matrix
+#'
+#' Completes implicit NULL's in intensity matrix.
+#'
+#' @param x intensity matrix. Formally a list of functions.
+#' @param type Can be either markov, semimarkov or mpp.
+#'
+#' @return list
+#' @export
+complete_intensity_matrix <- function(x, type = "mpp") {
+  diag(x) <- build_rates(x, type = type)
+  args <- names(formals(x[[1, 1]]))
+  args <- paste0(args, collapse = ", ")
+  func <- paste0("function(", args, ") 0")
+  func <- parse(text = func)
+  func <- eval(func)
+  idx <- sapply(x, is.null)
+  dim(idx) <- dim(x)
+  x[idx] <- list(func)
+  x
+}
