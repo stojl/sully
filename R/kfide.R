@@ -49,22 +49,30 @@ kfide <- function(x, t0, tn, u, h, keep_last = FALSE) {
             # Trapezoid rule
             probs <- ps[[i, l]][1:k, m]
             probs <- probs[2:k] - probs[1:(k - 1L)]
-            mus <- mus[2:k] - mus[1:(k - 1L)]
+            mus <- mus[2:k] + mus[1:(k - 1L)]
             int_2 <- int_2 + sum(probs * mus / 2)
           }
         }
 
         # We calculate first integral
         mus <- x[[j, j]](s, seq(0, u + s - t0, h))
+        # if(length(mus) > 1) browser()
         if(length(mus) == 1L) {
           # Intensity is independent of duration
           int_1 <- -mus * ps[[i, j]][1:k, m]
         } else {
           # Trapezoid rule
           probs <- ps[[i, j]][1:k, m]
-          probs <- probs[2:k] - probs[1:(k - 1L)]
-          mus <- mus[2:k] - mus[1:(k - 1L)]
-          int_1 <- -cumsum(probs * mus / 2)
+          probs1 <- probs[2:m] - probs[1:(m - 1L)]
+          mus1 <- mus[2:m] + mus[1:(m - 1L)]
+
+          int_1 <- -sum(probs1 * mus1 / 2)
+          if(k > m) {
+            probs2 <- probs[(m + 1):k] - probs[m:(k - 1L)]
+            mus2 <- mus[(m + 1):k] + mus[m:(k - 1L)]
+            int_3 <- cumsum(probs2 * mus2 / 2)
+            int_1 <- int_1 - c(0, int_3, rep(int_3[length(int_3)], m - 1))
+          }
         }
         ps[[i, j]][2:(k + 1), m + 1] <- ps[[i, j]][1:k, m] + (int_1 + int_2) * h
       }
