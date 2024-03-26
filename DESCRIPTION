@@ -1,5 +1,5 @@
 Package: sully
-Title: Estimation and Reserving in Disability Insurance
+Title: Simulation of Marked Point Processes
 Version: 0.3.0
 Authors@R: 
     person(given = "Lucas Støjko", 
