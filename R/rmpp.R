@@ -239,7 +239,6 @@ rmpp <- function(n,
     tn = tn,
     marked_end = mark_end
   )
-  # rmpp2(n, rates, drates, probs, t0, tn, y0, limit)
 }
 
 #' print method for rmpp simulations.
